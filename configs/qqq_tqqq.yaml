@@ -1,0 +1,19 @@
+universe:
+  pairs:
+    - name: qqq_tqqq
+      spot: QQQ
+      lev: TQQQ
+      leverage: 3.0
+      asset_class: equity
+
+data:
+  start: "2016-01-01"
+  end: null
+
+costs:
+  borrow_bps_annual: 200.0
+
+strategy:
+  hedge_method: "leverage"
+  rebalance_freq: "7D"
+  rebalance_threshold_pct: 0.03

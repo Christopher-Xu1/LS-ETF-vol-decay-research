@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "leveraged-decay-research"
+version = "0.1.0"
+description = "Research toolkit for convexity decay strategies in leveraged ETFs"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Research" }]
+dependencies = [
+  "numpy>=1.24",
+  "pandas>=2.0",
+  "scipy>=1.10",
+  "statsmodels>=0.14",
+  "matplotlib>=3.7",
+  "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+data = [
+  "yfinance>=0.2.40",
+  "ccxt>=4.0.0",
+  "pandas-datareader>=0.10.0",
+]
+dev = [
+  "pytest>=8.0",
+]
+
+[project.scripts]
+leveraged-decay = "src.cli:main"
+
+[tool.setuptools.package-dir]
+"" = "."
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"

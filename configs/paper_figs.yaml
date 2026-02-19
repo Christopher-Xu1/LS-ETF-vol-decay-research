@@ -1,0 +1,8 @@
+evaluation:
+  plot: true
+  save_dir: "reports"
+
+paper:
+  theme: "default"
+  dpi: 150
+  figsize: [10, 6]

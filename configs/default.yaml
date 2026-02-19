@@ -1,0 +1,75 @@
+universe:
+  pairs:
+    - name: btc_bitx
+      spot: BTC-USD
+      lev: BITX
+      leverage: 2.0
+      asset_class: crypto
+    - name: qqq_tqqq
+      spot: QQQ
+      lev: TQQQ
+      leverage: 3.0
+      asset_class: equity
+
+data:
+  start: "2021-01-01"
+  end: null
+  timezone: "UTC"
+  price_field: "adj_close"
+  fill_method: "ffill"
+  drop_missing: true
+  align_calendar: "intersection"
+
+strategy:
+  rebalance_freq: "7D"
+  hedge_method: "leverage"
+  hedge_lookback_days: 60
+  rebalance_threshold_pct: 0.05
+  target_delta: 0.0
+  gross_exposure: 1.0
+  max_gross: 1.5
+  max_leverage_leg_weight: 1.0
+  cap_short_weight: -1.0
+
+costs:
+  trading_bps: 2.0
+  borrow_bps_annual: 300.0
+  slippage_bps: 1.0
+  financing_rate_annual: 0.0
+  include_dividends: true
+
+regimes:
+  window_days: 30
+  vol_lookback_days: 30
+  drift_lookback_days: 30
+  autocorr_lag: 1
+  vol_split: "median"
+  drift_split: "median"
+  rho_split: 0.0
+  quantiles: [0.25, 0.5, 0.75]
+
+evaluation:
+  annualization: 252
+  risk_free_proxy: "SGOV"
+  plot: true
+  save_dir: "reports"
+
+stress:
+  scenarios:
+    - pair: btc_bitx
+      start: "2024-03-01"
+      end: "2024-06-30"
+      label: "crypto_vol_spike_2024"
+    - pair: qqq_tqqq
+      start: "2022-01-01"
+      end: "2022-10-31"
+      label: "growth_selloff_2022"
+  monte_carlo:
+    enabled: true
+    method: "permutation"   # permutation | block_bootstrap
+    n_paths: 250
+    horizon_days: 252
+    block_size: 5
+    seed: 42
+    shock_scale: 1.0
+    include_costs: true

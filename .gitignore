@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.pytest_cache/
+.venv/
+*.egg-info/
+build/
+dist/
+
+# Data artifacts
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+reports/figures/*
+!reports/figures/.gitkeep
+reports/tables/*
+!reports/tables/.gitkeep
+
+# Notebooks
+.ipynb_checkpoints/
+notebooks/data/
+notebooks/reports/
+
+# OS/editor
+.DS_Store
+.vscode/
+.history/

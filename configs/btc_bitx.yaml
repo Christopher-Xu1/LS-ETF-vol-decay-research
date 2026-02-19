@@ -1,0 +1,19 @@
+universe:
+  pairs:
+    - name: btc_bitx
+      spot: BTC-USD
+      lev: BITX
+      leverage: 2.0
+      asset_class: crypto
+
+data:
+  start: "2023-01-01"
+  end: null
+
+costs:
+  borrow_bps_annual: 600.0
+
+strategy:
+  hedge_method: "leverage"
+  rebalance_freq: "7D"
+  rebalance_threshold_pct: 0.03
