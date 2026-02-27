@@ -21,7 +21,6 @@ import numpy as np
 import pandas as pd
 
 from src.backtest.engine import run_backtest
-from src.backtest.reports import append_paper_summary
 from src.constants import LEV_RET_COL, SPOT_RET_COL
 from src.experiments import load_cfg, pair_list
 from src.experiments.run_baseline import run as run_baseline
@@ -415,40 +414,7 @@ def run(config_path: str) -> pd.DataFrame:
     figures_dir.mkdir(parents=True, exist_ok=True)
 
     scenarios, _ = _run_historical_windows(cfg, bt_by_pair, tables_dir=tables_dir)
-    mc_summary = _run_monte_carlo(cfg, bt_by_pair, tables_dir=tables_dir, figures_dir=figures_dir)
-
-    if not scenarios.empty and not mc_summary.empty:
-        worst_hist = scenarios.sort_values("window_return").iloc[0]
-        worst_mc = mc_summary.sort_values("p05_total_return").iloc[0]
-        append_paper_summary(
-            "## Stress Tests\n"
-            "Ran historical-window stress and Monte Carlo permutation stress.\n"
-            f"Worst historical window: {worst_hist['pair']} / {worst_hist['scenario']} ({worst_hist['window_return']:.2%}).\n"
-            f"Worst MC 5th percentile: {worst_mc['pair']} ({worst_mc['p05_total_return']:.2%}).",
-            save_dir=str(save_dir),
-        )
-    elif not scenarios.empty:
-        worst = scenarios.sort_values("window_return").iloc[0]
-        append_paper_summary(
-            "## Stress Tests\n"
-            "Ran predefined historical stress windows.\n"
-            f"Worst scenario: {worst['pair']} / {worst['scenario']} ({worst['window_return']:.2%}).",
-            save_dir=str(save_dir),
-        )
-    elif not mc_summary.empty:
-        worst_mc = mc_summary.sort_values("p05_total_return").iloc[0]
-        append_paper_summary(
-            "## Stress Tests\n"
-            "Ran Monte Carlo stress only (no overlapping historical windows found).\n"
-            f"Worst MC 5th percentile: {worst_mc['pair']} ({worst_mc['p05_total_return']:.2%}).",
-            save_dir=str(save_dir),
-        )
-    else:
-        append_paper_summary(
-            "## Stress Tests\n"
-            "No overlapping rows were found for configured stress scenarios; Monte Carlo was disabled or had no data.",
-            save_dir=str(save_dir),
-        )
+    _run_monte_carlo(cfg, bt_by_pair, tables_dir=tables_dir, figures_dir=figures_dir)
 
     # Return historical-window table to keep notebook/CLI compatibility.
     return scenarios

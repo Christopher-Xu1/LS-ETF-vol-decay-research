@@ -6,11 +6,50 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.backtest.reports import append_paper_summary, write_regime_outputs
+from src.backtest.reports import write_regime_outputs
 from src.experiments import load_cfg, pair_list
 from src.experiments.run_baseline import run as run_baseline
 from src.models.regimes import assign_regimes, conditional_stats, pivot_regime_heatmap
 from src.utils.plotting import plot_drift_vol_scatter, plot_regime_heatmap
+
+
+def _q_label_definition(label: str) -> str:
+    mapping = {
+        "Q1": "lowest quartile (0-25%)",
+        "Q2": "second quartile (25-50%)",
+        "Q3": "third quartile (50-75%)",
+        "Q4": "highest quartile (75-100%)",
+    }
+    return mapping.get(str(label), "quantile bin")
+
+
+def _write_heatmap_key_tables(pair_name: str, labeled: pd.DataFrame, save_dir: str) -> None:
+    tables_dir = Path(save_dir) / "tables"
+    tables_dir.mkdir(parents=True, exist_ok=True)
+
+    mu_key = (
+        labeled.dropna(subset=["mu_bin", "drift"])
+        .groupby("mu_bin", observed=False)["drift"]
+        .agg(lower_bound="min", upper_bound="max", n_obs="count")
+        .reset_index()
+        .rename(columns={"mu_bin": "bin"})
+    )
+    mu_key["axis"] = "mu_bin (y-axis, drift)"
+    mu_key["definition"] = mu_key["bin"].astype(str).map(_q_label_definition)
+
+    vol_key = (
+        labeled.dropna(subset=["vol_bin", "vol"])
+        .groupby("vol_bin", observed=False)["vol"]
+        .agg(lower_bound="min", upper_bound="max", n_obs="count")
+        .reset_index()
+        .rename(columns={"vol_bin": "bin"})
+    )
+    vol_key["axis"] = "vol_bin (x-axis, volatility)"
+    vol_key["definition"] = vol_key["bin"].astype(str).map(_q_label_definition)
+
+    key = pd.concat([mu_key, vol_key], ignore_index=True)
+    key = key[["axis", "bin", "definition", "lower_bound", "upper_bound", "n_obs"]]
+    key.to_csv(tables_dir / f"{pair_name}_regime_heatmap_key.csv", index=False)
 
 
 def run(config_path: str) -> dict[str, pd.DataFrame]:
@@ -31,6 +70,7 @@ def run(config_path: str) -> dict[str, pd.DataFrame]:
         heatmap = pivot_regime_heatmap(labeled, values_col="net_ret")
 
         write_regime_outputs(name, heatmap, stats_2d, save_dir=save_dir)
+        _write_heatmap_key_tables(name, labeled, save_dir=save_dir)
 
         rho_states = (
             labeled["regime_3d"]
@@ -68,11 +108,5 @@ def run(config_path: str) -> dict[str, pd.DataFrame]:
         stats_3d.to_csv(tables_dir / f"{name}_regime3d_stats.csv")
 
         out[name] = labeled
-
-    append_paper_summary(
-        "## Regime Analysis\n"
-        "Computed conditional performance by drift/volatility/autocorrelation regimes and exported heatmaps.",
-        save_dir=save_dir,
-    )
 
     return out

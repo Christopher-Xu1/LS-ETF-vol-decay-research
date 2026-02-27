@@ -8,7 +8,7 @@ import pandas as pd
 
 from src.backtest.engine import run_backtest
 from src.backtest.metrics import compute_metrics, metrics_frame
-from src.backtest.reports import append_paper_summary, write_backtest_outputs
+from src.backtest.reports import write_backtest_outputs
 from src.backtest.strategy import compute_target_weights
 from src.experiments import load_cfg, load_or_build_features, pair_list
 
@@ -58,13 +58,6 @@ def run(config_path: str) -> dict[str, pd.DataFrame]:
     save_dir = Path(cfg.get("evaluation", {}).get("save_dir", "reports")) / "tables"
     save_dir.mkdir(parents=True, exist_ok=True)
     summary.to_csv(save_dir / "baseline_metrics.csv")
-
-    append_paper_summary(
-        "## Baseline Backtest\n"
-        f"Generated baseline metrics for pairs: {', '.join(summary.index.tolist())}.\n"
-        f"Top Sharpe pair: {summary['sharpe'].idxmax()} ({summary['sharpe'].max():.2f}).",
-        save_dir=cfg.get("evaluation", {}).get("save_dir", "reports"),
-    )
 
     return backtests
 

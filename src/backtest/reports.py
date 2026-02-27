@@ -1,4 +1,4 @@
-"""Report generation utilities for figures, tables, and paper summary blocks."""
+"""Report generation utilities for figures and tables."""
 
 from __future__ import annotations
 
@@ -47,16 +47,3 @@ def write_regime_outputs(
 
     heatmap_df.to_csv(tables / f"{pair_name}_regime_heatmap.csv")
     stats_df.to_csv(tables / f"{pair_name}_regime_stats.csv")
-
-
-def append_paper_summary(text: str, save_dir: str = "reports") -> None:
-    paper_dir = ensure_dir(Path(save_dir) / "paper")
-    path = paper_dir / "paper.md"
-
-    if not path.exists():
-        path.write_text("# Leveraged Decay Research Notes\n\n", encoding="utf-8")
-
-    with path.open("a", encoding="utf-8") as handle:
-        handle.write("\n")
-        handle.write(text.strip())
-        handle.write("\n")

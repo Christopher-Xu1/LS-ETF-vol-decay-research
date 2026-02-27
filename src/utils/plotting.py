@@ -64,6 +64,7 @@ def plot_regime_heatmap(
     title: str,
     save_path: str | Path | None = None,
     fmt: str = ".2f",
+    colorbar_label: str = "Mean Daily Net Return",
 ) -> None:
     fig, ax = plt.subplots(figsize=(8, 6))
     vals = heatmap_df.values.astype(float)
@@ -73,12 +74,24 @@ def plot_regime_heatmap(
     ax.set_xticklabels(heatmap_df.columns)
     ax.set_yticklabels(heatmap_df.index)
     ax.set_title(title)
+    ax.set_xlabel("Volatility Quantile Bin (vol_bin)")
+    ax.set_ylabel("Drift Quantile Bin (mu_bin)")
 
     for i in range(heatmap_df.shape[0]):
         for j in range(heatmap_df.shape[1]):
-            ax.text(j, i, format(vals[i, j], fmt), ha="center", va="center", color="black", fontsize=8)
+            if np.isfinite(vals[i, j]):
+                ax.text(j, i, format(vals[i, j], fmt), ha="center", va="center", color="black", fontsize=8)
 
-    fig.colorbar(im, ax=ax, shrink=0.8)
+    cbar = fig.colorbar(im, ax=ax, shrink=0.8)
+    cbar.set_label(colorbar_label)
+    fig.text(
+        0.5,
+        0.01,
+        "Key: Q1=lowest quartile, Q2=25-50%, Q3=50-75%, Q4=highest quartile",
+        ha="center",
+        fontsize=9,
+    )
+    fig.tight_layout(rect=(0, 0.04, 1, 1))
     _finish(fig, save_path)
 
 

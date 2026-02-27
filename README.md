@@ -1,6 +1,6 @@
 # Leveraged Decay Research
 
-This repository backtests long-underlying/short-leveraged-ETF pair strategies to study convexity decay and volatility drag. It is structured around two benchmark pairs (`BTC-USD/BITX` and `QQQ/TQQQ`) and evaluates results by market regime (drift, volatility, autocorrelation), costs, and stress windows.
+This repository backtests long-underlying/short-leveraged-ETF pair strategies to study the viability of convexity decay based strategies. It is structured around two benchmark pairs  `BTC-USD/BITX` for crypto and equitt`QQQ/TQQQ`  and evaluates results by market regime (drift, volatility, autocorrelation), costs, and stress windows.
 
 ## Thesis
 
@@ -14,7 +14,7 @@ Daily-reset leveraged ETFs can underperform a simple multiple of the underlying 
 - `src/backtest/`: weight construction, execution engine, metrics, report exports
 - `src/experiments/`: orchestrated workflows (`baseline`, `regimes`, `sweeps`, `stress`)
 - `docs/`: implementation notes and behavior specifications
-- `reports/`: generated figures/tables/paper snippets
+- `reports/`: generated figures and tables
 - `tests/`: unit tests for core behavior
 
 ## Installation
@@ -71,6 +71,17 @@ For each pair and each date:
      - `block_bootstrap`
    - reruns the full execution engine per path (including schedule + threshold rebalances and costs).
 
+## Preliminary Results
+
+With current defaults (leverage hedge, weekly rebalance, 5% threshold trigger), both pairs are positive, with materially different risk profiles:
+
+- `qqq_tqqq`: higher consistency and risk-adjusted performance (Sharpe ~2.87, lower realized volatility and shallow drawdowns in sample).
+- `btc_bitx`: higher total return with higher volatility and deeper drawdowns, resulting in lower Sharpe (~0.28).
+
+Interpretation:
+- The QQQ/TQQQ pair has been more stable under current assumptions.
+- The BTC/BITX pair can perform, but path volatility is much higher and risk-adjusted returns are less reliable. Bitcoin bullish rallies are generally more parabolic than QQQ. It's not unusual to see a +10-20% move in a week which leads to massive compounded growth in the BITX leg and high asymmetric drawdown for short position.
+
 ## Important Parameter Groups
 
 `configs/default.yaml` is the source of truth.
@@ -101,34 +112,24 @@ Generated under `reports/`:
   - `reports/tables/stress_monte_carlo_summary.csv`
   - `reports/tables/<pair>_mc_path_metrics.csv`
   - `reports/figures/<pair>_mc_equity_fan.png`
-- `reports/paper/`: markdown summary notes for writeup integration
+- Regime heatmap axis-key artifacts:
+  - `reports/tables/<pair>_regime_heatmap_key.csv` (numeric lower/upper bounds and counts for each quartile bin)
+
+## Reading Regime Heatmaps
+
+- `x-axis = vol_bin`: volatility quantile bin.
+- `y-axis = mu_bin`: drift quantile bin.
+- Quartile labels:
+  - `Q1` = lowest quartile (0-25%)
+  - `Q2` = second quartile (25-50%)
+  - `Q3` = third quartile (50-75%)
+  - `Q4` = highest quartile (75-100%)
 
 ## Testing
 
 ```bash
 python -m pytest
 ```
-
-## GitHub Publish Checklist
-
-Before pushing to GitHub:
-
-1. Run tests:
-   ```bash
-   python -m pytest -q
-   ```
-2. Run a baseline backtest:
-   ```bash
-   python -m src.cli backtest --config configs/default.yaml
-   ```
-3. Verify generated artifacts are ignored:
-   - `data/raw`, `data/processed`
-   - `reports/figures`, `reports/tables`
-   - `notebooks/data`, `notebooks/reports`
-4. Ensure docs match behavior:
-   - `README.md`
-   - `docs/STRATEGY_BEHAVIOR.md`
-   - config defaults in `configs/default.yaml`
 
 ## Operational Notes
 
